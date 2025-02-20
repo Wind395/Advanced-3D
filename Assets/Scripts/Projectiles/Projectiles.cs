@@ -7,28 +7,40 @@ public abstract class Projectiles : MonoBehaviour
 
     public float speed;
     public float damage;
+    public float distance;
     
     private GameObject[] targets;
 
+    private NormalProjectilePooling projectilePooling;
+
     protected virtual void Start()
     {
+        projectilePooling = GameObject.Find("ProjectilesManager").GetComponent<NormalProjectilePooling>();
         targets = GameObject.FindGameObjectsWithTag("Enemy");
     }
 
     protected virtual void Update()
     {
-        
-        Debug.Log("Enemy Found: " + targets.Length);
-        if (targets.Length > 0)
+        foreach (GameObject target in targets)
         {
-            MoveTowardsEnemy();
+            if (Vector3.Distance(transform.position, target.transform.position) < distance)
+            {
+                MoveTowardsEnemy();
+            }
         }
-        MoveProjectile();
+        
+        StartCoroutine(MoveProjectile());
     }
 
-    public void MoveProjectile()
+    public IEnumerator MoveProjectile()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        if (projectilePooling == null)
+        {
+            Debug.Log("ProjectilePooling is null");
+        }
+        yield return new WaitForSeconds(3);
+        projectilePooling.ReturnProjectile(gameObject);
     }
 
     public void MoveTowardsEnemy()
@@ -38,7 +50,7 @@ public abstract class Projectiles : MonoBehaviour
 
         if (Vector3.Distance(transform.position, targets[0].transform.position) < 0.1f)
         {
-            Destroy(gameObject);
+            projectilePooling.ReturnProjectile(gameObject);
         }
     }
 

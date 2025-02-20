@@ -10,12 +10,14 @@ public class PlayerSkillController : MonoBehaviour
     [SerializeField] private GameObject launchPosition;
 
 
-    private Animator animator;
+    private Animator _animator;
+    private CharacterController _characterController;
 
     // Start is called before the first frame update
     void Start()
     {
-        animator = GetComponent<Animator>();
+        _animator = GetComponent<Animator>();
+        _characterController = GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
@@ -24,14 +26,16 @@ public class PlayerSkillController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             Debug.Log("Pressed");
-            animator.SetTrigger("normalAttack");
-            StartCoroutine(projectilesManager.LaunchNormalProjectile(launchPosition.transform.position));
+            _animator.SetTrigger("normalAttack");
+            _characterController.Move(Vector3.zero);
+            StartCoroutine(projectilesManager.LaunchNormalProjectile());
         }
 
         if (Input.GetKeyDown(KeyCode.F))
         {
             Debug.Log("Pressed");
-            animator.SetTrigger("fireBall");
+            _animator.SetTrigger("fireBall");
+            _characterController.Move(Vector3.zero);
             StartCoroutine(projectilesManager.LaunchFireBall(launchPosition.transform.position));
         }
     }

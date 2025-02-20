@@ -9,21 +9,30 @@ public class ProjectilesManager : MonoBehaviour
     public GameObject normalProjectile;
     public GameObject fireProjectile;
 
-    public GameObject firePos;
+    public GameObject _firePos;
     public GameObject spellCircleFire;
 
     public GameObject[] targets;
 
+    private NormalProjectilePooling _normalProjectilePooling;
+    private FireProjectilePooling _fireProjectilePooling;
+
     [SerializeField] private GameObject player;
 
-    public IEnumerator LaunchNormalProjectile(Vector3 position)
+    void Start()
+    {
+        _normalProjectilePooling = GetComponent<NormalProjectilePooling>();
+        _fireProjectilePooling = GetComponent<FireProjectilePooling>();
+    }
+
+    public IEnumerator LaunchNormalProjectile()
     {
         //NormalProjectile projectile = normalProjectile.GetComponent<NormalProjectile>();
         spellCircleFire.SetActive(true);
         yield return new WaitForSeconds(0.3f);
-        GameObject normalAmmo = Instantiate(normalProjectile, position, player.transform.rotation);
+        _normalProjectilePooling.GetProjectile(_firePos);
         yield return new WaitForSeconds(0.5f);
-        normalAmmo = Instantiate(normalProjectile, position, player.transform.rotation);
+        _normalProjectilePooling.GetProjectile(_firePos);
         yield return new WaitForSeconds(1f);
         spellCircleFire.SetActive(false);
         
@@ -34,7 +43,7 @@ public class ProjectilesManager : MonoBehaviour
         //FireProjectile projectile = fireProjectile.GetComponent<FireProjectile>();
         spellCircleFire.SetActive(true);
         yield return new WaitForSeconds(2);
-        GameObject fireball = Instantiate(fireProjectile, position, player.transform.rotation);
+        _fireProjectilePooling.GetObject(_firePos);
         yield return new WaitForSeconds(1);
         spellCircleFire.SetActive(false);
 
