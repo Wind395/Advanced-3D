@@ -27,7 +27,6 @@ public class ProjectilesManager : MonoBehaviour
 
     public IEnumerator LaunchNormalProjectile()
     {
-        //NormalProjectile projectile = normalProjectile.GetComponent<NormalProjectile>();
         spellCircleFire.SetActive(true);
         yield return new WaitForSeconds(0.3f);
         _normalProjectilePooling.GetProjectile(_firePos);
@@ -38,9 +37,8 @@ public class ProjectilesManager : MonoBehaviour
         
     }
 
-    public IEnumerator LaunchFireBall(Vector3 position)
+    public IEnumerator LaunchFireBall()
     {
-        //FireProjectile projectile = fireProjectile.GetComponent<FireProjectile>();
         spellCircleFire.SetActive(true);
         yield return new WaitForSeconds(2);
         _fireProjectilePooling.GetObject(_firePos);

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations;
 
 public class EnemyFSM : MonoBehaviour
 {
@@ -9,7 +10,8 @@ public class EnemyFSM : MonoBehaviour
         Idle,
         Patrol,
         Chase,
-        Attack
+        Attack,
+        Dead
     }
 
     private State _currentState;
@@ -31,7 +33,10 @@ public class EnemyFSM : MonoBehaviour
     public float chaseDistance;
     private bool isRunning = false;
 
-    // For Attack
+    // Stats
+    public int health;
+    public int damage;
+    public float speed;
     public float attackDistance;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -71,6 +76,9 @@ public class EnemyFSM : MonoBehaviour
             case State.Attack:
                 HandleAttack();
                 break;
+            case State.Dead:
+                HandleDead();
+                break;
         }
     }
 
@@ -80,26 +88,42 @@ public class EnemyFSM : MonoBehaviour
         _animator.SetBool("isRunning", false);
         _idleTimer -= Time.deltaTime;
         isRunning = false;
-        if (_idleTimer <= 0)
+        if (_idleTimer <= 0 && !isRunning && health > 0)
         {
             _currentState = State.Patrol;
             _currentPatrolIndex = (_currentPatrolIndex + 1) % patrolPoints.Length;
+        }
+
+        if (health <= 0)
+        {
+            _animator.SetBool("isRunning", false);
+            _currentState = State.Dead;
         }
     }
 
     void HandlePatrol()
     {
-        isRunning = true;
         if (DetectPlayer())
         {
             _currentState = State.Chase;
             return;
         }
 
-        _animator.SetBool("isRunning", true);
-        agent.SetDestination(patrolPoints[_currentPatrolIndex].position);
+        if (health <= 0)
+        {
+            isRunning = false;
+            _animator.SetBool("isRunning", false);
+            _currentState = State.Dead;
+            return;
+        }
 
-        if (Vector3.Distance(transform.position, patrolPoints[_currentPatrolIndex].position) < 1f)
+        if (health > 0)
+        {
+            _animator.SetBool("isRunning", true);
+            agent.SetDestination(patrolPoints[_currentPatrolIndex].position);
+        }
+
+        if (Vector3.Distance(transform.position, patrolPoints[_currentPatrolIndex].position) < 1f && health > 0)
         {
             _currentState = State.Idle;
             _idleTimer = 0;
@@ -118,7 +142,6 @@ public class EnemyFSM : MonoBehaviour
 
     void HandleChase()
     {
-        isRunning = true;
         if (!DetectPlayer())
         {
             _currentState = State.Idle;
@@ -129,9 +152,20 @@ public class EnemyFSM : MonoBehaviour
             _currentState = State.Attack;
         }
 
-        transform.LookAt(player.position);
-        _animator.SetBool("isRunning", true);
-        agent.SetDestination(player.position);
+        if (health <= 0)
+        {
+            _animator.SetBool("isRunning", false);
+            _currentState = State.Dead;
+        }
+
+        if (health > 0)
+        {
+            transform.LookAt(player.position);
+            _animator.SetBool("isRunning", true);
+            agent.SetDestination(player.position);
+        }
+
+        
     }
 
     void HandleAttack()
@@ -143,9 +177,45 @@ public class EnemyFSM : MonoBehaviour
 
         if (!AttackPlayer())
         {
-            _animator.SetBool("isRunning", isRunning);
+            _animator.SetBool("isRunning", true);
             _currentState = State.Chase;
         }
+
+        if (health <= 0)
+        {
+            _animator.SetBool("isRunning", false);
+            _currentState = State.Dead;
+        }
+    }
+
+    void OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.CompareTag("Projectile"))
+        {
+            Debug.Log("Hit");
+            health -= 1;
+            if (health <= 0)
+            {
+                Debug.Log("Dead");
+                _currentState = State.Dead;
+            }
+        }
+    }
+
+    void HandleDead()
+    {
+        DeadAnim();
+    }
+
+    void DeadAnim()
+    {
+        isRunning = false;
+        _animator.SetBool("isRunning", false);
+        _animator.SetBool("isDead", true);
+        SoundManager.Instance.PlaySFX("Dead");
+        agent.velocity = Vector3.zero;
+        agent.isStopped = true;
+        Destroy(gameObject, 2f);
     }
 
     void OnDrawGizmos()

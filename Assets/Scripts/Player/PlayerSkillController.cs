@@ -28,6 +28,7 @@ public class PlayerSkillController : MonoBehaviour
             Debug.Log("Pressed");
             _animator.SetTrigger("normalAttack");
             _characterController.Move(Vector3.zero);
+            SoundManager.Instance.PlaySFX("Fireball");
             StartCoroutine(projectilesManager.LaunchNormalProjectile());
         }
 
@@ -36,7 +37,8 @@ public class PlayerSkillController : MonoBehaviour
             Debug.Log("Pressed");
             _animator.SetTrigger("fireBall");
             _characterController.Move(Vector3.zero);
-            StartCoroutine(projectilesManager.LaunchFireBall(launchPosition.transform.position));
+            SoundManager.Instance.PlaySFX("Fireball");
+            StartCoroutine(projectilesManager.LaunchFireBall());
         }
     }
 }

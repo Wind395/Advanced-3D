@@ -14,12 +14,11 @@ public class NormalProjectilePooling : MonoBehaviour
     void Start()
     {
         projectilePool = new List<GameObject>();
-
         for (int i = 0; i < poolSize; i++)
         {
-            GameObject projectile = Instantiate(projectilePrefab);
-            projectile.SetActive(false);
-            projectilePool.Add(projectile);
+            GameObject newProjectile = Instantiate(projectilePrefab);
+            newProjectile.SetActive(false);
+            projectilePool.Add(newProjectile);
         }
     }
 
